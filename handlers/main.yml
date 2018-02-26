@@ -4,6 +4,5 @@
   supervisorctl: name={{item}} state=restarted
   with_items:
     - sentry-worker
-    - sentry-web
     - sentry-cron
-
+    - sentry-web

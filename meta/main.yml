@@ -3,16 +3,14 @@
 dependencies:
 - Stouts.nginx
 - Stouts.python
-# use git for supervisor (senic's fork)
-# - name: Stouts.supervisor
-#   src: ssh://git@github.com:getsenic/Stouts.supervisor.git
-#   scm: git
-- Stouts.supervisor
+- name: Stouts.supervisor
+  src: git+https://github.com/getsenic/Stouts.supervisor.git
+  version: 01cd49e5418faecd4e03af8e6aeb69562c03d46e
 - ANXS.postgresql
 - DavidWittman.redis
 
 galaxy_info:
-  author: lepture
+  author: Senic
   description: Install and setup Sentry
   license: MIT
   platforms:
