@@ -9,9 +9,6 @@
 - name: Ensure sentry static dir exists
   file: state=directory path={{sentry_home}}/_static owner={{sentry_user}}
 
-- name: Ensure sentry conf dir exists
-  file: state=directory path={{sentry_home}}/conf owner={{sentry_user}}
-
 - name: Ensure sentry logfile dir exists
   file: state=directory path={{sentry_logfile_dir}} owner={{sentry_user}} recurse=yes
   when: sentry_logfile_dir != ""
@@ -21,36 +18,37 @@
 - name: Check existince of Sentry virtualenv
   stat: path={{sentry_home}}/env
   register: sentry_has_virtualenv
-  become: yes
-  become_user: "{{sentry_user}}"
-
-- name: Install virtualenv
-  apt: pkg=python-virtualenv
-  when: sentry_has_virtualenv.stat.exists == False and ansible_os_family == 'Debian'
+  sudo: yes
+  sudo_user: "{{sentry_user}}"
 
 - name: Create virtualenv for Sentry using chosen Python
-  shell: virtualenv --python={{sentry_python}} {{sentry_home}}/env
-  become: yes
-  become_user: "{{sentry_user}}"
   when: sentry_has_virtualenv.stat.exists == False
+  shell: virtualenv --python={{sentry_python}} {{sentry_home}}/env
+  sudo: yes
+  sudo_user: "{{sentry_user}}"
 
 - name: Install Sentry
-  pip: name=sentry version={{sentry_version}} virtualenv="{{sentry_home}}/env"
-  become: yes
-  become_user: "{{sentry_user}}"
-  notify: [sentry restart]
+  pip: name=sentry executable={{sentry_home}}/env/bin/pip version={{sentry_version}}  virtualenv="{{sentry_home}}"/env
+  sudo: yes
+  sudo_user: "{{sentry_user}}"
+  when: sentry_install_src == 'pypi'
+
+- name: Install Sentry
+  pip: name=git+https://github.com/getsentry/sentry.git@master#egg=sentry executable={{sentry_home}}/env/bin/pip  virtualenv="{{sentry_home}}"/env
+  sudo: yes
+  sudo_user: "{{sentry_user}}"
+  when: sentry_install_src == 'git'
 
 - name: Install extensions
-  pip: name={{item}} virtualenv="{{sentry_home}}/env"
-  with_items: "{{sentry_extensions}}"
-  notify: [sentry restart]
+  pip: name={{item}} executable={{sentry_home}}/env/bin/pip
+  with_items: sentry_extensions
 
-- name: Configure Sentry pt.1
-  template: src=config.yml.j2 dest={{sentry_home}}/conf/config.yml owner={{sentry_user}}
-  notify: [sentry restart]
+- name: Prepare Sentry
+  template: src=sentry.j2 dest={{sentry_home}}/sentry owner={{sentry_user}} mode=0755
 
-- name: Configure Sentry pt.2
-  template: src=sentry.conf.py.j2 dest={{sentry_home}}/conf/sentry.conf.py owner={{sentry_user}}
+- name: Configure Sentry
+  template: src=config.py.j2 dest={{sentry_home}}/config.py owner={{sentry_user}}
+  register: config
   notify: [sentry restart]
 
 - name: Configure Supervisor
@@ -60,22 +58,22 @@
   file: state=directory path={{sentry_home}} owner={{sentry_user}} recurse=yes
 
 - name: Upgrade sentry
-  shell: "SENTRY_CONF={{sentry_home}}/conf {{sentry_home}}/env/bin/sentry upgrade --noinput"
+  shell: "{{sentry_home}}/sentry upgrade --noinput"
   register: sentry_upgrade
   changed_when: sentry_upgrade.rc
-  become: yes
-  become_user: "{{sentry_user}}"
+  sudo: yes
+  sudo_user: "{{sentry_user}}"
 
 - name: Clean Sentry Database
-  cron: job="SENTRY_CONF={{sentry_home}}/conf {{sentry_home}}/env/bin/sentry cleanup --days=30" minute=0 hour=0 user={{sentry_user}}
+  cron: job="{{sentry_home}}/sentry cleanup --days=30" minute=0 hour=0 user={{sentry_user}}
   when: sentry_cron
 
 - name: Collect sentry static files
-  shell: "SENTRY_CONF={{sentry_home}}/conf {{sentry_home}}/env/bin/sentry django collectstatic --noinput"
+  shell: "{{sentry_home}}/sentry django collectstatic --noinput"
   register: sentry_collected
   changed_when: not sentry_collected.stderr.startswith('\n0 static files copied')
-  become: yes
-  become_user: "{{sentry_user}}"
+  sudo: yes
+  sudo_user: "{{sentry_user}}"
 
 - name: Create nginx public key
   copy: content="{{ sentry_nginx_public_key }}" dest="{{ sentry_ssl_certificate }}"

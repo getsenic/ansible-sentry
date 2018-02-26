@@ -2,6 +2,12 @@
 
 dependencies:
 - Stouts.nginx
+- Stouts.python
+# use git for supervisor (senic's fork)
+# - name: Stouts.supervisor
+#   src: ssh://git@github.com:getsenic/Stouts.supervisor.git
+#   scm: git
+- Stouts.supervisor
 - ANXS.postgresql
 - DavidWittman.redis
 

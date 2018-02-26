@@ -18,7 +18,6 @@ sentry_python: python2.7                                  # In the case of multi
 
 sentry_ssl_certificate:                                   # SSL certificate file - also turns on HTTPS on Nginx
 sentry_ssl_certificate_key:                               # Key file for SSL cert
-sentry_ssl_force: False                                   # enable HSTS and redirect to https version
 
 sentry_config_additional: []                              # List of additional options
 
@@ -60,10 +59,10 @@ sentry_logfile_dir:
 sentry_access_log: /var/log/sentry-access.log
 sentry_error_log: /var/log/sentry-error.log
 
-sentry_nginx_scheme: "$scheme"
 sentry_nginx_timeout: 15s
 sentry_nginx_body_size: 150k
 
 # The following parameters are for toggling dependencies
 redis_enabled: yes
 nginx_enabled: yes
+python_enabled: yes

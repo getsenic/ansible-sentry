@@ -1,6 +1,6 @@
 [program:sentry-web]
 directory={{sentry_home}}
-environment=SENTRY_CONF="{{sentry_home}}/conf",PATH="{{sentry_home}}/env/bin"
+environment=SENTRY_CONF="{{sentry_home}}/config.py",PATH="{{sentry_home}}/env/bin"
 command={{sentry_home}}/env/bin/sentry start
 user={{sentry_user}}
 autostart=true
@@ -16,7 +16,7 @@ stderr_logfile=syslog
 
 [program:sentry-worker]
 directory={{sentry_home}}
-environment=SENTRY_CONF="{{sentry_home}}/conf"
+environment=SENTRY_CONF="{{sentry_home}}/config.py"
 command={{sentry_home}}/env/bin/sentry run worker
 user={{sentry_user}}
 autostart=true
@@ -30,9 +30,9 @@ stdout_logfile=syslog
 stderr_logfile=syslog
 {% endif %}
 
-[program:sentry-beat]
+[program:sentry-cron]
 directory={{sentry_home}}
-environment=SENTRY_CONF="{{sentry_home}}/conf"
+environment=SENTRY_CONF="{{sentry_home}}/config.py"
 command={{sentry_home}}/env/bin/sentry run cron
 user={{sentry_user}}
 autostart=true
