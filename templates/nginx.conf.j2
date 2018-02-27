@@ -5,16 +5,6 @@ limit_req_zone  $binary_remote_addr  zone=one:10m   rate=3r/s;
 limit_req_zone  $projectid  zone=two:10m   rate=3r/s;
 limit_req_status 429;
 
-
-server {
-
-    listen {{ sentry_port|default(80) }};    
-    server_name {{sentry_hostname}};
-    return 301 https://{{sentry_hostname}}$request_uri;
-    
-}
-
-
 server {
         
     server_name {{sentry_hostname}};
