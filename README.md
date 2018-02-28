@@ -79,7 +79,6 @@ sentry_logfile_dir:
 sentry_access_log: /var/log/sentry-access.log
 sentry_error_log: /var/log/sentry-error.log
 
-sentry_nginx_scheme: "$scheme"
 sentry_nginx_timeout: 15s
 sentry_nginx_body_size: 150k
 ```
