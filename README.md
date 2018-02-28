@@ -7,6 +7,7 @@ Ansible role which install and setup [Sentry](https://getsentry.com) 8.
 
 - Stouts.nginx
 - Stouts.python
+- Stouts.supervisor
 - ANXS.postgresql
 - DavidWittman.redis
 
