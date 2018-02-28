@@ -6,12 +6,12 @@ dependencies:
 - name: Stouts.supervisor
   role: Stouts.supervisor
   src: git+https://github.com/getsenic/Stouts.supervisor.git
-  version: 01cd49e5418faecd4e03af8e6aeb69562c03d46e
+  version: 1.2.1
 - ANXS.postgresql
 - DavidWittman.redis
 
 galaxy_info:
-  author: Senic
+  author: lepture
   description: Install and setup Sentry
   license: MIT
   platforms:

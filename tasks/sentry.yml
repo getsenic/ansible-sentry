@@ -34,7 +34,7 @@
   when: sentry_install_src == 'pypi'
 
 - name: Install Sentry
-  pip: name=git+https://github.com/getsentry/sentry.git@master#egg=sentry executable={{sentry_home}}/env/bin/pip  virtualenv="{{sentry_home}}"/env
+  pip: name=git+https://github.com/getsentry/sentry.git@{{sentry_install_branch}}#egg=sentry executable={{sentry_home}}/env/bin/pip  virtualenv="{{sentry_home}}"/env
   sudo: yes
   sudo_user: "{{sentry_user}}"
   when: sentry_install_src == 'git'
