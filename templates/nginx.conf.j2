@@ -7,9 +7,6 @@ limit_req_status 429;
 
 server {
 
-    {% if not sentry_ssl_certificate or not sentry_ssl_force %}
-    listen {{sentry_port}};
-    {% endif %}
     server_name {{sentry_hostname}};
 
     {% if sentry_ssl_certificate %}
@@ -25,10 +22,6 @@ server {
     ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:ECDHE-RSA-RC4-SHA:ECDHE-ECDSA-RC4-SHA:AES128:AES256:RC4-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK';
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:50m;
-
-    {% if sentry_ssl_force %}
-    add_header Strict-Transport-Security "max-age=31536000";
-    {% endif %}
     {% endif %}
 
     access_log {{sentry_access_log}};
@@ -37,7 +30,7 @@ server {
     proxy_set_header   Host                 $http_host;
     proxy_set_header   X-Real-IP            $remote_addr;
     proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
-    proxy_set_header   X-Forwarded-Proto    {{sentry_nginx_scheme}};
+    proxy_set_header   X-Forwarded-Proto    $scheme;
     proxy_redirect     off;
 
     keepalive_timeout 0;
@@ -52,38 +45,26 @@ server {
     client_body_buffer_size {{sentry_nginx_body_size}};
 
     location / {
-        proxy_pass http://{{sentry_web_host}}:{{sentry_web_port}};
+	proxy_pass http://{{sentry_web_host}}:{{sentry_web_port}};
     }
 
     location ~* /api/(?P<projectid>\d+/)?store/ {
-        proxy_pass http://{{sentry_web_host}}:{{sentry_web_port}};
-        limit_req zone=one burst=3 nodelay;
-        limit_req zone=two burst=10 nodelay;
+	proxy_pass http://{{sentry_web_host}}:{{sentry_web_port}};
+	limit_req zone=one burst=3 nodelay;
+	limit_req zone=two burst=10 nodelay;
     }
 
     {% if sentry_static_version is defined %}
     location /_static/{{sentry_static_version}}/ {
-        access_log off;
-        alias {{sentry_home}}/_static;
-        expires max;
+	access_log off;
+	alias {{sentry_home}}/_static;
+	expires max;
     }
     {% else %}
     location ^~ /_static/([0-9a-f]\{32\})/ {
-        access_log off;
-        alias {{sentry_home}}/_static;
-        expires max;
+	access_log off;
+	alias {{sentry_home}}/_static;
+	expires max;
     }
     {% endif %}
 }
-
-
-{% if sentry_ssl_certificate and sentry_ssl_force %}
-server {
-    listen {{ sentry_port|default(80) }};
-    server_name {{sentry_hostname}};
-
-    location / {
-        return 301 https://{{sentry_hostname}}$request_uri;
-    }
-}
-{% endif %}

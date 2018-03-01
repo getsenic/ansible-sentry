@@ -2,6 +2,11 @@
 
 dependencies:
 - Stouts.nginx
+- Stouts.python
+- name: Stouts.supervisor
+  role: Stouts.supervisor
+  src: git+https://github.com/getsenic/Stouts.supervisor.git
+  version: 1.2.1
 - ANXS.postgresql
 - DavidWittman.redis
 

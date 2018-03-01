@@ -5,4 +5,4 @@
   with_items:
     - sentry-web
     - sentry-worker
-    - sentry-beat
+    - sentry-cron

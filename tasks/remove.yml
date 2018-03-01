@@ -5,7 +5,7 @@
   with_items:
     - sentry-web
     - sentry-worker
-    - sentry-beat
+    - sentry-cron
 
 - name: Remove Supervisor configuration
   file: path={{supervisor_incdir}}/sentry.conf state=absent

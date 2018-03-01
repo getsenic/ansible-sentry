@@ -2,14 +2,5 @@
 
 - name: sentry-install | Install dependencies
   apt: name={{item}}
-  with_items:
-    - libxml2-dev
-    - libxslt1-dev
-    - zlib1g-dev
-    - libffi-dev
-    - libssl-dev
-    - libtiff5-dev
-    - libjpeg8-dev
+  with_items: [libxml2-dev, libxslt1-dev, zlib1g-dev, libffi-dev, libssl-dev]
 
-- name: sentry-install | Install supervisor
-  apt: name=supervisor
